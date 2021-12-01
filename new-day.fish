@@ -18,4 +18,6 @@ echo "creating $folder_name..."
 cargo new $folder_name
 or echo "failed to create $folder_name"
 
-rm -rf $folder_name/.git
+cd $folder_name
+ln -s ../Justfile
+rm -rf .git
