@@ -7,10 +7,10 @@ pub use board::Board;
 
 fn make_boards(lines: &str) -> (Vec<u32>, Vec<Board>) {
     let mut line_iter = lines.lines();
-    let first = line_iter.next().unwrap();
+    let numbers = line_iter.next().unwrap();
     line_iter.next();
 
-    let first: Vec<u32> = first
+    let numbers: Vec<u32> = numbers
         .split(',')
         .map(|num| num.parse::<u32>().unwrap())
         .collect();
@@ -29,29 +29,23 @@ fn make_boards(lines: &str) -> (Vec<u32>, Vec<Board>) {
         }
     }
 
-    (first, boards)
+    (numbers, boards)
 }
 
-fn part_one(numbers: &[u32], mut boards: Vec<Board>) -> u32 {
-    let mut winner_info = None;
+fn part_one(numbers: &[u32], boards: &[Board]) -> u32 {
+    let mut winner_info: Option<(u32, Board)> = None;
+    let mut boards: Vec<Board> = boards.iter().copied().collect();
 
     for num in numbers {
-        boards.iter_mut().for_each(|board| {
-            board.set_marked(*num);
-        });
+        boards.iter_mut().for_each(|board| board.set_marked(*num));
 
-        if let Some((idx, _)) = boards
-            .iter()
-            .enumerate()
-            .find(|(_idx, board)| board.has_won())
-        {
-            winner_info = Some((num, idx));
+        if let Some(&board) = boards.iter().find(|&board| board.has_won()) {
+            winner_info = Some((*num, board));
             break;
         }
     }
 
-    let (num, winner_idx) = winner_info.unwrap();
-    let board = &boards[winner_idx];
+    let (num, board) = winner_info.unwrap();
     let sum: u32 = board.unmarked().iter().map(|cell| cell.value).sum();
     num * sum
 }
@@ -77,7 +71,7 @@ fn part_two(numbers: &[u32], boards: &[Board]) -> u32 {
 
 fn main() {
     let (numbers, boards) = make_boards(include_str!("../input.txt"));
-    println!("Part 1: {}", part_one(&numbers, boards.clone()));
+    println!("Part 1: {}", part_one(&numbers, &boards));
     println!("Part 2: {}", part_two(&numbers, &boards));
 }
 
@@ -89,7 +83,7 @@ mod test {
     fn part_one() {
         let (numbers, boards) = make_boards(include_str!("../test_input.txt"));
         let expected = 4512;
-        assert_eq!(super::part_one(&numbers, boards), expected);
+        assert_eq!(super::part_one(&numbers, &boards), expected);
     }
 
     #[test]
